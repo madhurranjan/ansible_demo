@@ -33,8 +33,14 @@
           Name:  coreos001
 
     - name: Add host to group
-      add_host: hostname={{ item.private_ip }} groupname=launched
+      add_host: hostname={{ item.public_ip }} groupname=coreosnodes
       with_items: ec2.instances
       tags:
         - build
-    
+
+    - name: Add to inventory file
+      local_action: lineinfile dest=/Users/Madhurranjan/Projects/personal/ansible_demo/inventory insertafter='[coreosnodes]' line={{ item.public_ip }}
+      with_items: ec2.instances
+      tags:
+        - build
+
