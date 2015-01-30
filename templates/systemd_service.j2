@@ -1,0 +1,17 @@
+[Unit]
+Description=rails.service
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/systemd/env.conf
+TimeoutStartSec=10
+RestartSec=2
+Restart=on-failure
+ExecStartPre=-/usr/bin/docker kill railsserver
+ExecStartPre=-/usr/bin/docker rm railsserver
+ExecStart=/bin/bash -c 'source /etc/systemd/env.conf && /usr/bin/docker run --rm --name railsserver -v /var/log/:/var/log/  fcat/rails-getting-started:$RAILSSERVER'
+ExecStop=/usr/bin/docker stop railsserver
+
+[Install]
+WantedBy=multi-user.target
