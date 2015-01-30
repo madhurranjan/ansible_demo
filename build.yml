@@ -1,0 +1,40 @@
+--- 
+- hosts: localhost
+  vars:
+    userdata: "{{ lookup('file', 'files/user_data.txt') }}"
+    DEMO_ACCESS_KEY : "{{ lookup('env','DEMO_ACCESS_KEY') }}"
+    DEMO_SECRET_KEY: "{{ lookup('env','DEMO_SECRET_KEY') }}"
+
+  tasks:
+
+    - debug: var="{{ userdata }}"
+    
+    - name: Create node
+      local_action:
+            module: ec2
+            aws_access_key: "{{ DEMO_ACCESS_KEY }}"
+            aws_secret_key: "{{ DEMO_SECRET_KEY }}"
+            key_name: ansible_demo
+            group_id: sg-df39fbb2
+            instance_type: c3.large
+            image: ami-3615525e
+            wait: yes
+            wait_timeout: 400
+            user_data: "{{ userdata }}"
+            zone: us-east-1d
+            region: us-east-1
+      register: ec2
+      tags:
+        - build
+    
+    - local_action: ec2_tag resource={{ ec2.instance_ids[0] }} aws_access_key="{{ DEMO_ACCESS_KEY }}" aws_secret_key="{{ DEMO_SECRET_KEY }}" region=us-east-1
+      args:
+        tags:
+          Name:  coreos001
+
+    - name: Add host to group
+      add_host: hostname={{ item.private_ip }} groupname=launched
+      with_items: ec2.instances
+      tags:
+        - build
+    
