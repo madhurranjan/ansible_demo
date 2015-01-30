@@ -44,3 +44,10 @@
       tags:
         - build
 
+
+- hosts: coreosnodes
+  gather_facts: false
+  user: coreos
+  roles:
+    - role: defunctzombie.coreos-bootstrap
+  tags: bootstrap
