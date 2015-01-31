@@ -1,0 +1,19 @@
+--- 
+
+- hosts: coreosnodes
+  gather_facts: false
+  user: coreos
+  sudo: true
+  vars:
+    web_version: latest
+    image: madhurranjan/mamu_test
+  tasks:
+    - name: Download docker image
+      shell: /usr/bin/docker pull {{ image }}:{{ web_version }}
+      tags:
+        - deploy
+
+    - name: Restart systemd services
+      shell: /usr/bin/systemctl restart web.service
+      tags:
+        - deploy
